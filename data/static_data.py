@@ -13,3 +13,19 @@ ERROR_MESSAGES_LOGIN = {
 
 
 COURIER_REQUIRED_FIELDS = ["login", "password"]
+
+
+INVALID_CREDENTIALS_COMBINATIONS = [
+    (True, False),   # неверный логин, верный пароль
+    (False, True),   # верный логин, неверный пароль
+    (True, True)     # оба неверны
+    ]
+
+
+# Варианты цвета для создания заказа
+COLOR_VARIANTS = [
+    ["BLACK"],          # один цвет — чёрный
+    ["GREY"],           # один цвет — серый
+    ["BLACK", "GREY"],  # оба цвета
+    []                  # без цвета (пустой список)
+]

@@ -17,3 +17,18 @@ def generate_courier_data():
         "firstName": generate_random_string()
     }
    
+# Данные заказа с учетом разных цветов и возвращаем {} 
+def generate_order_data(color=None):
+    data = {
+        "firstName": "Naruto",
+        "lastName": "Uchiha",
+        "address": "Konoha, 142 apt.",
+        "metroStation": 4,
+        "phone": "+7 800 355 35 35",
+        "rentTime": 5,
+        "deliveryDate": "2026-06-06",
+        "comment": "Saske, come back to Konoha"
+    }
+    if color is not None:
+        data["color"] = color
+    return data  

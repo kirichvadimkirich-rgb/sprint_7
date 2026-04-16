@@ -9,5 +9,5 @@ class CourierClient(BaseClient):
         return self.post(LOGIN_COURIER, json={"login": login, "password": password})
     
     def delete_courier(self, courier_id):
-        endpoint = DELETE_COURIER.format(courier_id)
-        return self._send_request("DELETE", endpoint)
+        id = DELETE_COURIER.format(courier_id)
+        return self._send_request("DELETE", id)

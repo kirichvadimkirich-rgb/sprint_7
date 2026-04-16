@@ -31,7 +31,7 @@ class TestCourierCreate:
     def test_create_duplicate_courier_fails(self, create_courier_response, courier_client): 
         first_response, data = create_courier_response
             
-        with allure.step('Проверить кода ответа: 201'):
+        with allure.step('Проверить код ответа: 201'):
             assert first_response.status_code == 201, f"Первый курьер не создан: {first_response.text}"
 
         with allure.step('Повторить отправку POST-запроса на создание курьера'):
@@ -41,7 +41,7 @@ class TestCourierCreate:
         with allure.step('Проверить код ответа: 409'): 
             assert second_response.status_code == 409
 
-        with allure.step(f'Проверка кода ответа: "message": "{ERROR_MESSAGES_CREATE["duplicate_login"]}"'):    
+        with allure.step(f'Проверить код ответа: "message": "{ERROR_MESSAGES_CREATE["duplicate_login"]}"'):    
             assert second_response.json()["message"] == ERROR_MESSAGES_CREATE["duplicate_login"] 
 
 
@@ -53,16 +53,16 @@ class TestCourierCreate:
             data = generate_courier_data()
             attach_request_data(data, name='Сгенерированные данные курьера')
 
-        with allure.step('Удаление обязательного поля'):    
+        with allure.step('Удалить обязательное поле'):    
             del data[missing_field]
             attach_request_data(data, name='Данные курьера')
 
-        with allure.step('Отправка POST-запроса на создание курьера'):
+        with allure.step('Отправить POST-запрос на создание курьера'):
             response = courier_client.create_courier(data)
             attach_response(response, name_prefix="Создание курьера")
 
-        with allure.step('Проверка кода ответа: 400'):
+        with allure.step('Проверить код ответа: 400'):
             assert response.status_code == 400
 
-        with allure.step(f'Проверка кода ответа: "message": "{ERROR_MESSAGES_CREATE["missing_data_create"]}"'): 
+        with allure.step(f'Проверить код ответа: "message": "{ERROR_MESSAGES_CREATE["missing_data_create"]}"'): 
             assert response.json()["message"] == ERROR_MESSAGES_CREATE["missing_data_create"]
