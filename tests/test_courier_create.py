@@ -12,7 +12,7 @@ import pytest
 class TestCourierCreate:
     @allure.title('Успешное создание курьера')
     @allure.description('Проверка: курьер создаётся, код 201, тело {"ok":true}')
-    def test_create_courier_success(self, create_courier_response):
+    def test_create_courier_success(self):
         response, _ = create_courier_response
             
         with allure.step('Проверить код ответа: 201'):
