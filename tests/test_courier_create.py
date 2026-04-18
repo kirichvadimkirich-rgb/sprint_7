@@ -12,27 +12,38 @@ import pytest
 class TestCourierCreate:
     @allure.title('Успешное создание курьера')
     @allure.description('Проверка: курьер создаётся, код 201, тело {"ok":true}')
-    def test_create_courier_success(self):
-        response, _ = create_courier_response
+    def test_create_courier_success(self, courier_client):
+        with allure.step('Сгенерировать данные нового курьера'):
+            data = generate_courier_data()
+            attach_request_data(data, name='Данные курьера')
+
+        with allure.step('Отправить POST-запрос на создание курьера'):
+            response = courier_client.create_courier(data)
+            attach_response(response, name_prefix="Создание курьера")
             
         with allure.step('Проверить код ответа: 201'):
             assert response.status_code == 201
 
         with allure.step('Проверить, что ответ содержит {"ok": true}'):    
             assert response.json()['ok']
+
+        with allure.step('Удалить созданного курьера'):
+            courier_client.delete_courier_by_credentials  
         
 
     @allure.title('Нельзя создать двух одинаковых курьеров')
     @allure.description(f"""
-                         Проверка1: курьер создаётся, код 201
-                         Проверка2: курьер не создается, "code": 409,
+                         Проверка: повторный запрос с теми же данными возвращает "code": 409,
                          тело "{ERROR_MESSAGES_CREATE["duplicate_login"]}"
                         """)
-    def test_create_duplicate_courier_fails(self, create_courier_response, courier_client): 
-        first_response, data = create_courier_response
-            
-        with allure.step('Проверить код ответа: 201'):
-            assert first_response.status_code == 201, f"Первый курьер не создан: {first_response.text}"
+    def test_create_duplicate_courier_fails(self, courier_client): 
+        with allure.step('Сгенерировать данные нового курьера'):
+            data = generate_courier_data()
+            attach_request_data(data, name='Данные курьера')
+
+        with allure.step('Отправить POST-запрос на создание курьера'):
+            first_response = courier_client.create_courier(data)
+            attach_response(first_response, name_prefix="Создание курьера")
 
         with allure.step('Повторить отправку POST-запроса на создание курьера'):
             second_response = courier_client.create_courier(data)
@@ -43,7 +54,10 @@ class TestCourierCreate:
 
         with allure.step(f'Проверить код ответа: "message": "{ERROR_MESSAGES_CREATE["duplicate_login"]}"'):    
             assert second_response.json()["message"] == ERROR_MESSAGES_CREATE["duplicate_login"] 
-
+        
+        with allure.step('Удалить созданного курьера'):
+            courier_client.delete_courier_by_credentials   
+         
 
     @allure.title('Создание курьера без обязательного поля (пароль, логин) возвращает ошибку')
     @allure.description(f'Проверка: курьер не создаётся, код 400, тело "{ERROR_MESSAGES_CREATE["missing_data_create"]}"')
@@ -66,3 +80,4 @@ class TestCourierCreate:
 
         with allure.step(f'Проверить код ответа: "message": "{ERROR_MESSAGES_CREATE["missing_data_create"]}"'): 
             assert response.json()["message"] == ERROR_MESSAGES_CREATE["missing_data_create"]
+      
