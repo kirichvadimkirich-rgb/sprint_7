@@ -1,0 +1,83 @@
+from config.settings import BASE_URL, API_DOCS_URL
+from data.generator import generate_courier_data
+from utils.allure_helpers import attach_response, attach_request_data
+from data.static_data import ERROR_MESSAGES_CREATE, COURIER_REQUIRED_FIELDS
+import allure
+import pytest
+
+
+@allure.feature('Создание курьера')
+@allure.link(BASE_URL, name='Ссылка на страницу сайта')
+@allure.link(API_DOCS_URL, name='Ссылка на страницу документации API')
+class TestCourierCreate:
+    @allure.title('Успешное создание курьера')
+    @allure.description('Проверка: курьер создаётся, код 201, тело {"ok":true}')
+    def test_create_courier_success(self, courier_client):
+        with allure.step('Сгенерировать данные нового курьера'):
+            data = generate_courier_data()
+            attach_request_data(data, name='Данные курьера')
+
+        with allure.step('Отправить POST-запрос на создание курьера'):
+            response = courier_client.create_courier(data)
+            attach_response(response, name_prefix="Создание курьера")
+            
+        with allure.step('Проверить код ответа: 201'):
+            assert response.status_code == 201
+
+        with allure.step('Проверить, что ответ содержит {"ok": true}'):    
+            assert response.json()['ok']
+
+        with allure.step('Удалить созданного курьера'):
+            courier_client.delete_courier_by_credentials  
+        
+
+    @allure.title('Нельзя создать двух одинаковых курьеров')
+    @allure.description(f"""
+                         Проверка: повторный запрос с теми же данными возвращает "code": 409,
+                         тело "{ERROR_MESSAGES_CREATE["duplicate_login"]}"
+                        """)
+    def test_create_duplicate_courier_fails(self, courier_client): 
+        with allure.step('Сгенерировать данные нового курьера'):
+            data = generate_courier_data()
+            attach_request_data(data, name='Данные курьера')
+
+        with allure.step('Отправить POST-запрос на создание курьера'):
+            first_response = courier_client.create_courier(data)
+            attach_response(first_response, name_prefix="Создание курьера")
+
+        with allure.step('Повторить отправку POST-запроса на создание курьера'):
+            second_response = courier_client.create_courier(data)
+            attach_response(second_response, name_prefix="Повторное создание курьера")
+
+        with allure.step('Проверить код ответа: 409'): 
+            assert second_response.status_code == 409
+
+        with allure.step(f'Проверить код ответа: "message": "{ERROR_MESSAGES_CREATE["duplicate_login"]}"'):    
+            assert second_response.json()["message"] == ERROR_MESSAGES_CREATE["duplicate_login"] 
+        
+        with allure.step('Удалить созданного курьера'):
+            courier_client.delete_courier_by_credentials   
+         
+
+    @allure.title('Создание курьера без обязательного поля (пароль, логин) возвращает ошибку')
+    @allure.description(f'Проверка: курьер не создаётся, код 400, тело "{ERROR_MESSAGES_CREATE["missing_data_create"]}"')
+    @pytest.mark.parametrize("missing_field", COURIER_REQUIRED_FIELDS)
+    def test_create_courier_missing_field(self, courier_client, missing_field):
+        with allure.step('Генерация данных нового курьера'):
+            data = generate_courier_data()
+            attach_request_data(data, name='Сгенерированные данные курьера')
+
+        with allure.step('Удалить обязательное поле'):    
+            del data[missing_field]
+            attach_request_data(data, name='Данные курьера')
+
+        with allure.step('Отправить POST-запрос на создание курьера'):
+            response = courier_client.create_courier(data)
+            attach_response(response, name_prefix="Создание курьера")
+
+        with allure.step('Проверить код ответа: 400'):
+            assert response.status_code == 400
+
+        with allure.step(f'Проверить код ответа: "message": "{ERROR_MESSAGES_CREATE["missing_data_create"]}"'): 
+            assert response.json()["message"] == ERROR_MESSAGES_CREATE["missing_data_create"]
+      
