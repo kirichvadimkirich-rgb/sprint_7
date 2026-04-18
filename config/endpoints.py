@@ -14,3 +14,6 @@ DELETE_COURIER = "/api/v1/courier/{}"
 CREATE_ORDER = "/api/v1/orders"
 # Получение списка заказов
 GET_ORDERS = "/api/v1/orders"
+
+# Путь к документации API
+DOCS_PATH = "/docs/"
