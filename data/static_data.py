@@ -15,11 +15,11 @@ ERROR_MESSAGES_LOGIN = {
 COURIER_REQUIRED_FIELDS = ["login", "password"]
 
 
-INVALID_CREDENTIALS_COMBINATIONS = [
-    (True, False),   # неверный логин, верный пароль
-    (False, True),   # верный логин, неверный пароль
-    (True, True)     # оба неверны
-    ]
+INVALID_CREDENTIALS_COMBINATIONS  = [
+    ("invalidlogin", "valid_password_placeholder"),   # неверный логин, верный пароль
+    ("valid_login_placeholder", "invalidpassword"),   # верный логин, неверный пароль
+    ("invalidlogin", "invalidpassword")                # оба неверны
+]
 
 
 # Варианты цвета для создания заказа

@@ -56,17 +56,18 @@ class TestCourierLogin:
 
     @allure.title('Авторизация курьера с несуществующей парой (пароль, логин), возвращает ошибку')
     @allure.description(f'Проверка: курьер не авторизуется, код 404, тело "{ERROR_MESSAGES_LOGIN["non_existent_data"]}"')
-    @pytest.mark.parametrize("bad_login, bad_password", INVALID_CREDENTIALS_COMBINATIONS) 
-    def test_authorization_invalid_credentials(self,create_courier_response, courier_client, bad_login, bad_password):
+    @pytest.mark.parametrize("login_input, password_input", INVALID_CREDENTIALS_COMBINATIONS) 
+    def test_authorization_invalid_credentials(self, create_courier_response, courier_client, login_input, password_input):
         _, data = create_courier_response 
 
         with allure.step('Изменить нужные поля'):
-            login = data["login"]
-            password = data["password"]
-            if bad_login:
-                login = "bad" + login
-            if bad_password:
-                password = "bad" + password
+            valid_login = data["login"]
+            valid_password = data["password"]
+            # Подстановка реальных валидных значений вместо плейсхолдеров
+            login = login_input.replace("valid_login_placeholder", valid_login)
+            password = password_input.replace("valid_password_placeholder", valid_password)
+            payload = {"login": login, "password": password}
+            attach_request_data(payload, name='Данные для входа (неверные)')
 
         with allure.step('Отправить POST-запрос на авторизацию'):
             login_resp = courier_client.login_courier(login, password)
